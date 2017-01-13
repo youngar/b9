@@ -103,7 +103,7 @@ interpret(ExecutionContext *context, Instruction *program)
     if (*address) {
         StackElement result = 0;
 
-#if PASS_PARAMETERS_DIRECTLY
+if (context->passParameters) {
         int argsCount = progArgCount(*program); 
         //printf("about to call jit args %d\n", argsCount);
         switch (argsCount) {
@@ -134,10 +134,10 @@ interpret(ExecutionContext *context, Instruction *program)
                 printf ("Need to add handlers for more parameters\n");
                 break;
         } 
-#else
+} else {  
         Interpret jitedcode = (Interpret)*address;
         result = (*jitedcode)(context, program);
-#endif 
+}  
         return result;
     } 
 
@@ -273,9 +273,9 @@ removeGeneratedCode(ExecutionContext *context, int functionIndex)
 
 void
 removeAllGeneratedCode(ExecutionContext *context)
-{
+{ 
     int functionIndex = 0;
-    while(context->functions[functionIndex] != NO_MORE_FUNCTIONS) {
+    while(context->functions[functionIndex] != NO_MORE_FUNCTIONS) { 
         removeGeneratedCode(context, functionIndex);
         functionIndex++;
     }
@@ -383,9 +383,9 @@ benchMarkFib(ExecutionContext *context)
     /* make sure everything is not-jit'd for this initial bench
      * allows you to put examples above, tests etc, and not influence this
      * benchmark compare interpreted vs JIT'd */
-    //  removeAllGeneratedCode(context);
+     removeAllGeneratedCode(context);
 
-    int LOOP = 200000;
+    int LOOP = 200;
     printf("\nAbout to run %d loops, interpreted\n", LOOP);
 
     long timeInterp = 0;
@@ -493,7 +493,35 @@ main(int argc, char *argv[])
 
     if (context.name == nullptr) {
         printf("No program was passed to b9, Running default benchmark for b9, looping 200000.\n");
+        context.directCall = 0;
+        context.passParameters = 0;
+        context.operandStack = 0;
+ 
+        printf("Direct call == %d, Pass Parameters Directly = %d Use Operand Stack = %d\n",
+        context.directCall,context.passParameters, context.operandStack  );
+        benchMarkFib(&context);   
+             
+        // context.directCall = 1;
+        // context.passParameters = 0;
+        // context.operandStack = 0;
+        // printf("Direct call == %d, Pass Parameters Directly = %d Use Operand Stack = %d\n",
+        // context.directCall,context.passParameters, context.operandStack  );
+        // benchMarkFib(&context);        
+ 
+        context.directCall = 1;
+        context.passParameters = 1;
+        context.operandStack = 0;
+        printf("Direct call == %d, Pass Parameters Directly = %d Use Operand Stack = %d\n",
+        context.directCall,context.passParameters, context.operandStack  );
+        benchMarkFib(&context);    
+          
+        context.directCall = 1;
+        context.passParameters = 1;
+        context.operandStack = 1;
+        printf("Direct call == %d, Pass Parameters Directly = %d Use Operand Stack = %d\n",
+        context.directCall,context.passParameters, context.operandStack  );
         benchMarkFib(&context);
+
         // TODO use the common path below to time
         context.name = "./bench.so";
         context.loopCount = 200000;
