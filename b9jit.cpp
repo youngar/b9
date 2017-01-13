@@ -152,24 +152,23 @@ B9Method::B9Method(TR::TypeDictionary *types, Instruction *program, ExecutionCon
     AllLocalsHaveBeenDefined();
 }
 
-
-#if PASS_PARAMETERS_DIRECTLY
+ 
 static const char *argsAndTempNames[]= 
 {"arg0", "arg1", "arg2", "arg3", "arg4", "arg5", "arg6", "arg7", "arg8", "arg9"};
-#endif 
+
 
 void
 B9Method::defineParameters()
 {
     DefineParameter("context", executionContextType);
     DefineParameter("program", int32PointerType);
-#if PASS_PARAMETERS_DIRECTLY
-    int argsCount = progArgCount(*program);
-    for (int i = 0;i<argsCount;i++) { 
-        // printf ("Arg %d defined <%s>\n", i, argsAndTempNames[i]);
-        DefineParameter(argsAndTempNames[i], Int64); 
-    }
-#endif
+    if (context->passParameters) {
+        int argsCount = progArgCount(*program);
+        for (int i = 0;i<argsCount;i++) { 
+            // printf ("Arg %d defined <%s>\n", i, argsAndTempNames[i]);
+            DefineParameter(argsAndTempNames[i], Int64); 
+        }
+    } 
 }
 
 void
@@ -177,14 +176,14 @@ B9Method::defineLocals()
 {
     int argsCount = progArgCount(*program);
     int tempCount = progTmpCount(*program); 
-#if PASS_PARAMETERS_DIRECTLY
-    for (int i = argsCount;i<argsCount+tempCount;i++) { 
-        // printf ("Temp %d defined <%s>\n", i, argsAndTempNames[i]);
-        DefineLocal(argsAndTempNames[i], Int64); 
-    }
-#else
-    DefineLocal("returnSP", Int64);
-#endif
+    if (context->passParameters) {
+        for (int i = argsCount;i<argsCount+tempCount;i++) { 
+            // printf ("Temp %d defined <%s>\n", i, argsAndTempNames[i]);
+            DefineLocal(argsAndTempNames[i], Int64); 
+        }
+    } else {
+        DefineLocal("returnSP", Int64);
+    } 
 }
 
 void
@@ -211,15 +210,11 @@ B9Method::defineFunctions()
 
     DefineFunction((char *)"interpret", (char *)__FILE__, "interpret", (void *)&interpret, Int64, 2, Int64, Int64);
 }
-
-#if USE_VM_OPERAND_STACK
+ 
 #define QSTACK(b) (((B9VirtualMachineState *)(b)->vmState())->_stack)
 #define QCOMMIT(b) ((b)->vmState()->Commit(b));  
 #define QRELOAD(b)  ((b)->vmState()->Reload(b)); 
-#else 
-#define QCOMMIT(b)   
-#define QRELOAD(b)    
-#endif
+ 
 
 void
 B9Method::createBuilderForBytecode(TR::BytecodeBuilder **bytecodeBuilderTable, uint8_t bytecode, int64_t bytecodeIndex)
@@ -274,7 +269,7 @@ B9Method::buildIL()
   //printf("builder %p\n", builder);
     AppendBuilder(builder);
 
-#if !PASS_PARAMETERS_DIRECTLY 
+ if (!context->passParameters) { 
     TR::IlValue *nargs = builder->ConstInt32(progArgCount(*program) * sizeof(StackElement));
     TR::IlValue *tmps = builder->ConstInt32(progTmpCount(*program) * sizeof(StackElement));
 
@@ -283,7 +278,7 @@ B9Method::buildIL()
     builder->Store("returnSP", args);
     sp = builder->Add(sp, tmps);
     builder->StoreIndirect("executionContextType", "stackPointer", builder->Load("context"), sp);
-#endif
+}
 
 
     i = METHOD_FIRST_BC_OFFSET;
@@ -304,31 +299,30 @@ B9Method::buildIL()
 TR::IlValue *
 B9Method::loadVarIndex(TR::BytecodeBuilder *builder, int varindex)
 {
-#if PASS_PARAMETERS_DIRECTLY
-    return builder->Load(argsAndTempNames[varindex]);
-#else 
-    TR::IlValue *args = builder->Load("returnSP");
-    TR::IlValue *address = builder->IndexAt(stackElementPointerType, args, builder->ConstInt32(varindex)); 
-    TR::IlValue *result = builder->LoadAt(stackElementPointerType, address);  
-    result = builder->ConvertTo(Int64, result); 
-    return result;
-#endif
+    if (context->passParameters) {
+        return builder->Load(argsAndTempNames[varindex]);
+    } else { 
+        TR::IlValue *args = builder->Load("returnSP");
+        TR::IlValue *address = builder->IndexAt(stackElementPointerType, args, builder->ConstInt32(varindex)); 
+        TR::IlValue *result = builder->LoadAt(stackElementPointerType, address);  
+        result = builder->ConvertTo(Int64, result); 
+        return result;
+    }
 }
 
 void
 B9Method::storeVarIndex(TR::BytecodeBuilder *builder, int varindex, TR::IlValue *value)
 {
-#if PASS_PARAMETERS_DIRECTLY
-    builder->Store(argsAndTempNames[varindex], value);
-    return; 
-#else 
-    TR::IlValue *args = builder->Load("returnSP");
-    TR::IlValue *address = builder->IndexAt(stackElementPointerType,
-        args,
-        builder->ConstInt32(varindex));
-    builder->StoreAt(address, value);
-#endif 
-
+    if (context->passParameters) {
+        builder->Store(argsAndTempNames[varindex], value);
+        return; 
+    } else {
+        TR::IlValue *args = builder->Load("returnSP");
+        TR::IlValue *address = builder->IndexAt(stackElementPointerType,
+            args,
+            builder->ConstInt32(varindex));
+        builder->StoreAt(address, value);
+    }  
 }
 
 bool
@@ -381,9 +375,9 @@ B9Method::generateILForBytecode(TR::BytecodeBuilder **bytecodeBuilderTable,
         break;
     case RETURN: {
         auto result = pop(builder); 
-#if !PASS_PARAMETERS_DIRECTLY
+  if (!context->passParameters) {  
         builder->StoreIndirect("executionContextType", "stackPointer", builder->Load("context"), builder->Load("returnSP"));
-#endif
+    } 
         builder->Return(result);
     } break;
     case DROP:
@@ -411,7 +405,9 @@ B9Method::generateILForBytecode(TR::BytecodeBuilder **bytecodeBuilderTable,
     } break;
     case CALL: {
         int callindex = getParameterFromInstruction(instruction);
-#if USE_DIRECT_CALL
+
+        TR::IlValue *result = 0;
+if (context->directCall) {
 
 // functions; move to B9Method::functions 
 
@@ -430,9 +426,9 @@ B9Method::generateILForBytecode(TR::BytecodeBuilder **bytecodeBuilderTable,
                 nameToCall = "interpret";
         } 
 
-#if PASS_PARAMETERS_DIRECTLY
+if (context->passParameters) {
         int argsCount = progArgCount(*program); 
-        TR::IlValue *result = 0;
+        //TR::IlValue *result = 0;
         switch (argsCount) {
             case 0:  
             result = 
@@ -460,24 +456,28 @@ B9Method::generateILForBytecode(TR::BytecodeBuilder **bytecodeBuilderTable,
                 printf ("Need to add handlers for more parameters\n");
                 break;
         } 
-#else 
-    QCOMMIT(builder);
+} else { 
+    if (context->operandStack) { 
+        QCOMMIT(builder);
+    }
     TR::IlValue *result = 
                 builder->Call(nameToCall, 2, builder->Load("context"), builder->ConstAddress(tocall));      
-#endif 
+}  
 
-#if !PASS_PARAMETERS_DIRECTLY
-#if USE_VM_OPERAND_STACK  //locally inform the operand stck the parms are consumed by the call
+ if (!context->passParameters) { 
+ if (context->operandStack) {  //locally inform the operand stck the parms are consumed by the call
             QSTACK(builder)->Drop(builder, progArgCount(*tocall));
-#endif 
-#endif 
+ }   
+}
 
-#else
+} else {  // not direct call 
         TR::IlValue *fTable = builder->LoadIndirect("executionContextType", "functions", builder->Load("context"));
         TR::IlValue *address = builder->IndexAt(int64PointerType, fTable, builder->ConstInt32(callindex));
-        QCOMMIT(builder);
-        TR::IlValue *result = builder->Call("interpret", 2, builder->Load("context"), builder->LoadAt(int64PointerType, address));
-#endif 
+        if (context->operandStack) { 
+            QCOMMIT(builder);
+        }
+        result = builder->Call("interpret", 2, builder->Load("context"), builder->LoadAt(int64PointerType, address));
+}
        push(builder, result);
 
         if (nextBytecodeBuilder)
@@ -558,29 +558,29 @@ B9Method::drop(TR::BytecodeBuilder *builder)
 TR::IlValue *
 B9Method::pop(TR::BytecodeBuilder *builder)
 {
-#if USE_VM_OPERAND_STACK
+ if (context->operandStack) { 
         return QSTACK(builder)->Pop(builder);
-#else
+ } else {  
         TR::IlValue *sp = builder->LoadIndirect("executionContextType", "stackPointer", builder->Load("context"));
         TR::IlValue *newSP = builder->IndexAt(stackElementPointerType, sp, builder->ConstInt32(-1));
 
         builder->StoreIndirect("executionContextType", "stackPointer", builder->Load("context"), newSP);
 
         return builder->LoadAt(stackElementPointerType, newSP);;
-#endif
+ } 
 }
 
 void
 B9Method::push(TR::BytecodeBuilder *builder, TR::IlValue *value)
 {
-#if USE_VM_OPERAND_STACK
+ if (context->operandStack) { 
         return QSTACK(builder)->Push(builder, value);
-#else
+ } else {  
         TR::IlValue *sp = builder->LoadIndirect("executionContextType", "stackPointer", builder->Load("context"));
         builder->StoreAt(builder->ConvertTo(stackElementPointerType, sp), builder->ConvertTo(stackElementType, value));
 
         TR::IlValue *newSP = builder->IndexAt(stackElementPointerType, sp, builder->ConstInt32(1));
 
         builder->StoreIndirect("executionContextType", "stackPointer", builder->Load("context"), newSP);
-#endif 
+ }  
 }
