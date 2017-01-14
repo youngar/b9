@@ -94,6 +94,17 @@ bc_sub(ExecutionContext *context)
     push(context, result);
 }
 
+void
+bc_mul(ExecutionContext *context)
+{
+    // left-right is push(left);push(right); sub
+    StackElement right = pop(context);
+    StackElement left = pop(context);
+    StackElement result = left * right;
+
+    push(context, result);
+}
+
 /* ByteCode Interpreter */
 
 StackElement
@@ -153,6 +164,11 @@ interpret(ExecutionContext *context, Instruction *program)
         // b9PrintStack(context);
         // printf("about to run %d %d\n", getByteCodeFromInstruction(*instructionPointer), getParameterFromInstruction(*instructionPointer));
         switch (getByteCodeFromInstruction(*instructionPointer)) {
+        case MUL:
+            //  printf("add\n");
+            bc_mul(context);
+            break;
+
         case PUSH_CONSTANT:
             // printf("push\n");
             bc_push_constant(context, getParameterFromInstruction(*instructionPointer));
@@ -521,6 +537,7 @@ main(int argc, char *argv[])
         gettimeofday(&tval_after, NULL);
         timersub(&tval_after, &tval_before, &tval_result);
 
+        timeInterp = (tval_result.tv_sec * 1000 + (tval_result.tv_usec / 1000));
         // printf("    resultInterp is %ld\n", resultInterp);
     }
 
@@ -540,6 +557,7 @@ main(int argc, char *argv[])
         gettimeofday(&tval_after, NULL);
         timersub(&tval_after, &tval_before, &tval_result);
 
+        timeJIT = (tval_result.tv_sec * 1000 + (tval_result.tv_usec / 1000));
         // printf("    resultJit is %ld\n", resultJit);
     }
 

@@ -400,6 +400,9 @@ B9Method::generateILForBytecode(TR::BytecodeBuilder **bytecodeBuilderTable,
     case SUB:
         handle_bc_sub(builder, nextBytecodeBuilder);
         break;
+    case MUL:
+        handle_bc_mul(builder, nextBytecodeBuilder);
+        break;
     case ADD:
         handle_bc_add(builder, nextBytecodeBuilder);
         break;
@@ -538,6 +541,17 @@ B9Method::handle_bc_sub(TR::BytecodeBuilder *builder, TR::BytecodeBuilder *nextB
     push(builder, builder->Sub(left, right));
     builder->AddFallThroughBuilder(nextBuilder);
 }
+
+void
+B9Method::handle_bc_mul(TR::BytecodeBuilder *builder, TR::BytecodeBuilder *nextBuilder)
+{
+    TR::IlValue *right = pop(builder);
+    TR::IlValue *left = pop(builder);
+
+    push(builder, builder->Mul(left, right));
+    builder->AddFallThroughBuilder(nextBuilder);
+}
+
 
 void
 B9Method::handle_bc_add(TR::BytecodeBuilder *builder, TR::BytecodeBuilder *nextBuilder)

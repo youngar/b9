@@ -43,6 +43,7 @@ typedef int64_t StackElement;
 #define RETURN              0x8
 #define JMPLE               0x9
 #define JMP                 0xA
+#define MUL                 0xB
 
 /* VM State */
 

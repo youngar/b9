@@ -4,6 +4,8 @@ function program() {
 	var a = 100;
 	var b = 10; 
 	b--;
+
+	b = b * 3;
 	
 	call_sub (100, 9);
 	call_add(5, 6);

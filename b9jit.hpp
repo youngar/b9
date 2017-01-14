@@ -68,6 +68,9 @@ private:
     void
     handle_bc_sub(TR::BytecodeBuilder *builder, TR::BytecodeBuilder *nextBuilder);
     void
+    handle_bc_mul(TR::BytecodeBuilder *builder, TR::BytecodeBuilder *nextBuilder);
+
+    void
     handle_bc_add(TR::BytecodeBuilder *builder, TR::BytecodeBuilder *nextBuilder);
     void
     handle_bc_call(TR::BytecodeBuilder *builder, TR::BytecodeBuilder *nextBuilder);
