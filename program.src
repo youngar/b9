@@ -26,6 +26,7 @@ function testHashmap( ) {
 
 	var result = hashTableGet (ht, "hi6");
 	b9puts(result);
+	b9puts("I'M DONE DONE DONE");
 
 }
 
@@ -40,11 +41,15 @@ function fib(arg) {
 function b9main() {
 	var a = 100;
  
+    b9puts("yyyyy");
 
 	testHashmap( );
 
 
-    b9puts("hi");
+    b9puts("xxxxx");
+    b9puts("xxxxx2");
+    b9puts("xxxxx3");
+    b9puts("xxxxx4");
 
 	while (a > 0) {
 		a = a - 1;

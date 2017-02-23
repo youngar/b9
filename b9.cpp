@@ -33,7 +33,7 @@ bc_call(ExecutionContext* context, Parameter value)
 extern "C" void
 b9_prim_puts(ExecutionContext* context)
 {
-   char * string = (char *) pop(context);
+   char * string =  keyToChar(pop(context));
    puts(string);
    push(context, 0);
 }
@@ -205,19 +205,24 @@ StackElement
 interpret_0(ExecutionContext* context, Instruction* program)
 {
 
+printf ("interpret_0 HOIHKJHKJHKJHKJHKJH");
     return interpret(context, program);
 }
 StackElement
 interpret_1(ExecutionContext* context, Instruction* program, StackElement p1)
 {
+printf ("interpret_1 HOIHKJHKJHKJHKJHKJH");
+
 
     push(context, p1);
+    b9PrintStack(context);
+ 
     return interpret(context, program);
 }
 StackElement
 interpret_2(ExecutionContext* context, Instruction* program, StackElement p1, StackElement p2)
 {
-
+printf ("interpret_2 HOIHKJHKJHKJHKJHKJH");
     push(context, p1);
     push(context, p2);
     return interpret(context, program);
