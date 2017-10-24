@@ -39,30 +39,25 @@ class ExecutionContext;
 // Primitive Function from Interpreter call
 extern "C" typedef void(PrimitiveFunction)(ExecutionContext *virtualMachine);
 
-void bc_primitive(VirtualMachine *context, Parameter value);
-
-// typedef StackElement (*Interpret) (ExecutionContext* context, Instruction*
-// program);
-
 typedef StackElement (*Interpret)(ExecutionContext *context,
-                                  const Instruction *program);
+                                  const std::size_t functionIndex);
 
 // define C callable Interpret API for each arg call
 // if args are passed to the function, they are not passed
 // on the intepreter stack
 
 typedef StackElement (*interpret_n_args)(ExecutionContext *context,
-                                         Instruction *program, ...);
+                                         const std::size_t functionIndex, ...);
 
 typedef StackElement (*Interpret_0_args)(ExecutionContext *context,
-                                         Instruction *program);
+                                         const std::size_t functionIndex);
 typedef StackElement (*Interpret_1_args)(ExecutionContext *context,
-                                         Instruction *program, StackElement p1);
+                                         const std::size_t functionIndex, StackElement p1);
 typedef StackElement (*Interpret_2_args)(ExecutionContext *context,
-                                         Instruction *program, StackElement p1,
+                                         const std::size_t functionIndex, StackElement p1,
                                          StackElement p2);
 typedef StackElement (*Interpret_3_args)(ExecutionContext *context,
-                                         Instruction *program, StackElement p1,
+                                         const std::size_t functionIndex, StackElement p1,
                                          StackElement p2, StackElement p3);
 
 typedef StackElement (*JIT_0_args)();
@@ -86,6 +81,8 @@ StackElement interpret_2(ExecutionContext *context, const std::size_t functionIn
                          StackElement p1, StackElement p2);
 StackElement interpret_3(ExecutionContext *context, const std::size_t functionIndex,
                          StackElement p1, StackElement p2, StackElement p3);
+
+void primitive_call(ExecutionContext *context, Parameter value);
 
 /* Debug Helpers */
 void b9PrintStack(ExecutionContext *context);
