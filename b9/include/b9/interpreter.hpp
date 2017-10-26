@@ -52,21 +52,37 @@ struct Stack {
 
 typedef StackElement (*JitFunction)(...);
 
-class ExecutionContext {
- public:
+struct ExecutionContext {
+
   ExecutionContext(VirtualMachine *virtualMachine, const Config &cfg)
       : stackPointer_(this->stack_),
-        virtualMachine_(virtualMachine), 
+        virtualMachine_(virtualMachine),
         cfg_(cfg) {
     std::memset(stack_, 0, sizeof(StackElement) * 1000);
   }
 
-  StackElement interpret(std::size_t functionIndex);
+  // Calling Functions
+
+  /// Call a function. If the function has been JIT compiled, use the compiled
+  /// version. Otherwise, interpret the function. This function is okay for
+  /// public use.
+  StackElement callFunction(std::size_t index);
+
+  /// Interpret a function.
+  StackElement interpretFunction(std::size_t index);
+
+  /// Call a jitFunction. The spec must describe f.
+  StackElement callJitFunction(std::size_t index);
+
+  /// Call a jitFunction with the PassParam calling conventions. Don't use this
+  /// directly, use callFunction.
+  StackElement callJitFunctionWithPassParam(std::size_t index);
+
+  // Bytecode Implementations
 
   void push(StackElement value);
   StackElement pop();
 
-  void functionCall(Parameter value);
   void functionReturn(StackElement returnVal);
   void primitiveCall(Parameter value);
   Parameter jmp(Parameter offset);
@@ -92,8 +108,6 @@ class ExecutionContext {
   void reset();
 
   StackElement *stackPointer_;
-
- private:
   StackElement stack_[1000];
   Instruction *programCounter_ = 0;
   StackElement *stackEnd_ = &stack_[1000];
@@ -107,22 +121,29 @@ class VirtualMachine {
 
   ~VirtualMachine() noexcept;
 
-  /// Load a module into the VM.
+  /// Load a module into the VM. May only be called once.
   void load(std::shared_ptr<const Module> module);
+
+  /// The main entry point for execution. Make sure you load a module FIRST.
   StackElement run(const std::size_t index,
                    const std::vector<StackElement> &usrArgs);
+
   StackElement run(const std::string &name,
                    const std::vector<StackElement> &usrArgs);
 
+  JitFunction generateCode(const std::size_t functionIndex);
+
+  void generateAllCode();
+
   const FunctionSpec *getFunction(std::size_t index);
+
   PrimitiveFunction *getPrimitive(std::size_t index);
 
   JitFunction getJitAddress(std::size_t functionIndex);
+
   void setJitAddress(std::size_t functionIndex, JitFunction value);
 
   std::size_t getFunctionCount();
-  JitFunction generateCode(const std::size_t functionIndex);
-  void generateAllCode();
 
   const char *getString(int index);
 
@@ -141,22 +162,12 @@ class VirtualMachine {
 typedef StackElement (*Interpret)(ExecutionContext *context,
                                   const std::size_t functionIndex);
 
-
-
 // define C callable Interpret API for each arg call
 // if args are passed to the function, they are not passed
 // on the intepreter stack
 
-StackElement interpret_0(ExecutionContext *context,
-                         const std::size_t functionIndex);
-StackElement interpret_1(ExecutionContext *context,
-                         const std::size_t functionIndex, StackElement p1);
-StackElement interpret_2(ExecutionContext *context,
-                         const std::size_t functionIndex, StackElement p1,
-                         StackElement p2);
-StackElement interpret_3(ExecutionContext *context,
-                         const std::size_t functionIndex, StackElement p1,
-                         StackElement p2, StackElement p3);
+StackElement interpret(ExecutionContext *context,
+                         std::size_t index);
 
 void primitive_call(ExecutionContext *context, Parameter value);
 

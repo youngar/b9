@@ -194,19 +194,9 @@ void MethodBuilder::defineFunctions() {
     functionIndex++;
   }
 
-  DefineFunction((char *)"interpret_0", (char *)__FILE__, "interpret_0",
-                 (void *)&interpret_0, Int64, 2, addressPointerType,
+  DefineFunction((char *)"interpret", (char *)__FILE__, "interpret_0",
+                 (void *)&interpret, Int64, 2, addressPointerType,
                  int32PointerType);
-  DefineFunction((char *)"interpret_1", (char *)__FILE__, "interpret_1",
-                 (void *)&interpret_1, Int64, 3, addressPointerType,
-                 int32PointerType, stackElementType);
-  DefineFunction((char *)"interpret_2", (char *)__FILE__, "interpret_2",
-                 (void *)&interpret_2, Int64, 4, addressPointerType,
-                 int32PointerType, stackElementType, stackElementType);
-  DefineFunction((char *)"interpret_3", (char *)__FILE__, "interpret_3",
-                 (void *)&interpret_3, Int64, 5, addressPointerType,
-                 int32PointerType, stackElementType, stackElementType,
-                 stackElementType);
   DefineFunction((char *)"primitive_call", (char *)__FILE__, "primitive_call",
                  (void *)&primitive_call, Int64, 2, addressPointerType, Int32);
 }
@@ -584,11 +574,11 @@ bool MethodBuilder::generateILForBytecode(
       } else {
         // only use interpreter to dispatch the calls
         if (cfg_.debug)
-          std::cout << "Calling interpret_0 to dispatch call for "
+          std::cout << "Calling interpret to dispatch call for "
                     << callee->name << " with " << argsCount << " args\n";
         QCOMMIT(builder);
         TR::IlValue *result = builder->Call(
-            "interpret_0", 2,
+            "interpret", 2,
             builder->ConstAddress(virtualMachine_->executionContext()),
             builder->ConstInt32(callindex));
         QRELOAD_DROP(builder, argsCount);
