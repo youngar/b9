@@ -195,9 +195,9 @@ void MethodBuilder::defineFunctions() {
     functionIndex++;
   }
 
-  DefineFunction((char *)"jitToInterpreterCall", (char *)__FILE__, "interpret_0",
-                 (void *)&jitToInterpreterCall, Int64, 2, addressPointerType,
-                 int32PointerType);
+  DefineFunction((char *)"jitToInterpreterCall", (char *)__FILE__,
+                 "interpret_0", (void *)&jitToInterpreterCall, Int64, 2,
+                 addressPointerType, int32PointerType);
   DefineFunction((char *)"primitive_call", (char *)__FILE__, "primitive_call",
                  (void *)&primitive_call, Int64, 2, addressPointerType, Int32);
 }
@@ -468,20 +468,19 @@ bool MethodBuilder::generateILForBytecode(
         builder->AddFallThroughBuilder(nextBytecodeBuilder);
     } break;
     case ByteCode::FUNCTION_CALL: {
-      auto index  = std::size_t(instruction.parameter());
+      auto index = std::size_t(instruction.parameter());
       auto callee = virtualMachine_->getFunction(index);
-      auto nargs  = callee->nargs;
-      auto name   = callee->name.c_str();
-  
+      auto nargs = callee->nargs;
+      auto name = callee->name.c_str();
+
       auto jitFunction = virtualMachine_->getJitAddress(index);
 
-      ////////////// Try to inline the function first
-
+      ////////////// TODO: Try to inline the function first
 
       ////////////// Emit interpreter callout
 
       if (!cfg_.directCall || jitFunction == nullptr) {
-        // if (cfg_.debug)
+        if (cfg_.debug)
           std::cerr << "EMIT: InterpCall: " << *callee << std::endl;
 
         QCOMMIT(builder);
@@ -496,7 +495,7 @@ bool MethodBuilder::generateILForBytecode(
       /////////// Emit direct call without passparam
 
       else if (!cfg_.passParam) {
-        // if (cfg_.debug)
+        if (cfg_.debug)
           std::cout << "EMIT: DirectCall: " << *callee << std::endl;
 
         QCOMMIT(builder);
@@ -508,7 +507,7 @@ bool MethodBuilder::generateILForBytecode(
       /////////// Emit direct call with passparam
 
       else {
-        // if (cfg_.debug)
+        if (cfg_.debug)
           std::cerr << "EMIT: PassParam: " << *callee << std::endl;
 
         //////// TODO: Inline HERE!!!
@@ -516,7 +515,6 @@ bool MethodBuilder::generateILForBytecode(
         std::vector<TR::IlValue *> parameters(nargs);
         for (std::size_t i = nargs; i > 0; i--) {
           parameters[i - 1] = pop(builder);
-          std::cerr << "-- ARG: " << i << ") " << parameters[i] << std::endl;
         }
         auto result =
             builder->Call(callee->name.c_str(), nargs, parameters.data());
@@ -525,7 +523,7 @@ bool MethodBuilder::generateILForBytecode(
 
       if (nextBytecodeBuilder)
         builder->AddFallThroughBuilder(nextBytecodeBuilder);
-  
+
     } break;
     default:
       if (cfg_.debug) {
@@ -541,6 +539,44 @@ bool MethodBuilder::generateILForBytecode(
 /*************************************************
  * GENERATE CODE FOR BYTECODES
  *************************************************/
+
+#if 0
+void MethodBuilder::handle_bc_function_call(
+    TR::BytecodeBuilder *builder,
+    std::vector<TR::BytecodeBuilder *> bytecodeBuilderTable,
+    const Instruction *program, long bytecodeIndex) {
+
+      if (cfg_.directCall && cfg_.passParam) {
+
+      }
+      if (cfg_.directCall) {
+        if (cfg_.passParam) {
+          handle_bc_function_call_passparam
+        } else {
+          handle_bc_function_call_directcall
+        }
+      } else {
+        handle_bc_function_call_interpreter
+      }
+
+    }
+
+void MethodBuilder::handle_bc_function_call_interpreter(
+    TR::BytecodeBuilder *builder,
+    std::vector<TR::BytecodeBuilder *> bytecodeBuilderTable,
+    const Instruction *program, long bytecodeIndex) {}
+
+void MethodBuilder::handle_bc_function_call_directcall(
+    TR::BytecodeBuilder *builder,
+    std::vector<TR::BytecodeBuilder *> bytecodeBuilderTable,
+    const Instruction *program, long bytecodeIndex) {}
+
+void MethodBuilder::handle_bc_function_call_passparam(
+    TR::BytecodeBuilder *builder,
+    std::vector<TR::BytecodeBuilder *> bytecodeBuilderTable,
+    const Instruction *program, long bytecodeIndex) {}
+
+#endif // 0
 
 void MethodBuilder::handle_bc_jmp(
     TR::BytecodeBuilder *builder,
