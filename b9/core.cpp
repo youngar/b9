@@ -21,8 +21,8 @@ namespace b9 {
 ////////////////////////////////////////
 
 StackElement ExecutionContext::callFunction(std::size_t index) {
-
-  if (cfg_.debug) std::cerr << "Interpreter: Calling function" << index << std::endl;
+  if (cfg_.debug)
+    std::cerr << "Interpreter: Calling function" << index << std::endl;
 
   auto jitFunction = virtualMachine_->getJitAddress(index);
 
@@ -34,8 +34,8 @@ StackElement ExecutionContext::callFunction(std::size_t index) {
 }
 
 StackElement ExecutionContext::interpretFunction(std::size_t index) {
-
-  if (cfg_.debug) std::cerr << "Interpreter: Interpreting function: " << index << std::endl;
+  if (cfg_.debug)
+    std::cerr << "Interpreter: Interpreting function: " << index << std::endl;
 
   auto function = virtualMachine_->getFunction(index);
 
@@ -126,7 +126,8 @@ StackElement ExecutionContext::interpretFunction(std::size_t index) {
 StackElement ExecutionContext::callJitFunction(std::size_t index) {
   assert(cfg_.jit);
 
-  if (cfg_.debug) std::cerr << "Interpreter: calling JitFunction: " << index << std::endl;
+  if (cfg_.debug)
+    std::cerr << "Interpreter: calling JitFunction: " << index << std::endl;
 
   if (cfg_.passParam) {
     if (cfg_.debug) std::cerr << "passing parameters directly" << std::endl;
@@ -148,7 +149,7 @@ StackElement ExecutionContext::callJitFunctionWithPassParam(std::size_t index) {
   assert(cfg_.passParam);
 
   auto function = virtualMachine_->getFunction(index);
-  auto jitFunction =  virtualMachine_->getJitAddress(index);
+  auto jitFunction = virtualMachine_->getJitAddress(index);
 
   assert(jitFunction != nullptr);
 
@@ -328,9 +329,7 @@ void ExecutionContext::strPushConstant(Parameter value) {
   TODO
 } */
 
-
 // Context helpers and misc
-
 
 void ExecutionContext::reset() {
   stackPointer_ = stack_;
@@ -342,7 +341,9 @@ void primitive_call(ExecutionContext *context, Parameter value) {
   context->primitiveCall(value);
 }
 
-StackElement interpret(ExecutionContext *context, std::size_t value) {
+StackElement jitToInterpreterCall(ExecutionContext *context,
+                                          std::size_t value) {
+                                            // std::cerr << __PRETTY_FUNCTION__;
   return context->callFunction(value);
 }
 

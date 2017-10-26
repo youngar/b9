@@ -52,8 +52,8 @@ struct Stack {
 
 typedef StackElement (*JitFunction)(...);
 
-struct ExecutionContext {
-
+class ExecutionContext {
+public:
   ExecutionContext(VirtualMachine *virtualMachine, const Config &cfg)
       : stackPointer_(this->stack_),
         virtualMachine_(virtualMachine),
@@ -166,8 +166,7 @@ typedef StackElement (*Interpret)(ExecutionContext *context,
 // if args are passed to the function, they are not passed
 // on the intepreter stack
 
-StackElement interpret(ExecutionContext *context,
-                         std::size_t index);
+StackElement jitToInterpreterCall(ExecutionContext *context, std::size_t index);
 
 void primitive_call(ExecutionContext *context, Parameter value);
 
