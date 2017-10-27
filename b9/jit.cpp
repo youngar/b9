@@ -490,9 +490,6 @@ void MethodBuilder::handle_bc_function_call(std::size_t index,
                                             TR::BytecodeBuilder *builder,
                                             TR::BytecodeBuilder *nextBuilder) {
   auto jitFunction = virtualMachine_->getJitAddress(index);
-  auto callee = virtualMachine_->getFunction(index);
-  auto nargs = callee->nargs;
-  auto name = callee->name.c_str();
 
   ////////////// TODO: Try to inline the function first
 
