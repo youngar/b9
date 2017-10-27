@@ -489,26 +489,15 @@ bool MethodBuilder::generateILForBytecode(
 void MethodBuilder::handle_bc_function_call(std::size_t index,
                                             TR::BytecodeBuilder *builder,
                                             TR::BytecodeBuilder *nextBuilder) {
+  auto jitFunction = virtualMachine_->getJitAddress(index);
   auto callee = virtualMachine_->getFunction(index);
   auto nargs = callee->nargs;
   auto name = callee->name.c_str();
 
-  auto jitFunction = virtualMachine_->getJitAddress(index);
-
   ////////////// TODO: Try to inline the function first
 
-  ////////////// Emit interpreter callout
-
   if (!cfg_.directCall || jitFunction == nullptr) {
-    if (cfg_.debug) std::cerr << "EMIT: InterpCall: " << *callee << std::endl;
-
-    QCOMMIT(builder);
-    TR::IlValue *result = builder->Call(
-        "jitToInterpreterCall", 2,
-        builder->ConstAddress(virtualMachine_->executionContext()),
-        builder->ConstInt32(index));
-    QRELOAD_DROP(builder, nargs);
-    push(builder, result);
+    emitInterpreterCall(index, builder);
   }
 
   /////////// Emit direct call without passparam
@@ -542,13 +531,24 @@ void MethodBuilder::handle_bc_function_call(std::size_t index,
   }
 }
 
+void MethodBuilder::emitInterpreterCall(std::size_t index,
+                                        TR::BytecodeBuilder *builder) {
+  auto callee = virtualMachine_->getFunction(index);
+  auto nargs = callee->nargs;
+
+  if (cfg_.debug) std::cerr << "EMIT: InterpCall: " << *callee << std::endl;
+
+  QCOMMIT(builder);
+  TR::IlValue *result =
+      builder->Call("jitToInterpreterCall", 2,
+                    builder->ConstAddress(virtualMachine_->executionContext()),
+                    builder->ConstInt32(index));
+  QRELOAD_DROP(builder, nargs);
+  push(builder, result);
+}
+
 #if 0
-
-void MethodBuilder::handle_bc_function_call_interpreter(
-    TR::BytecodeBuilder *builder,
-    std::vector<TR::BytecodeBuilder *> bytecodeBuilderTable,
-    const Instruction *program, long bytecodeIndex) {}
-
+    
 void MethodBuilder::handle_bc_function_call_directcall(
     TR::BytecodeBuilder *builder,
     std::vector<TR::BytecodeBuilder *> bytecodeBuilderTable,

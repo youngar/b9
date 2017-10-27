@@ -88,6 +88,8 @@ class MethodBuilder : public TR::MethodBuilder {
   void handle_bc_function_call(std::size_t index, TR::BytecodeBuilder *builder,
                                TR::BytecodeBuilder *nextBuilder);
 
+  void emitInterpreterCall(std::size_t index, TR::BytecodeBuilder *builder);
+
   void handle_bc_jmp(TR::BytecodeBuilder *builder,
                      std::vector<TR::BytecodeBuilder *> bytecodeBuilderTable,
                      const Instruction *program, long bytecodeIndex);
