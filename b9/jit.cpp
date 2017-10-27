@@ -498,17 +498,8 @@ void MethodBuilder::handle_bc_function_call(std::size_t index,
 
   if (!cfg_.directCall || jitFunction == nullptr) {
     emitInterpreterCall(index, builder);
-  }
-
-  /////////// Emit direct call without passparam
-
-  else if (!cfg_.passParam) {
-    if (cfg_.debug) std::cout << "EMIT: DirectCall: " << *callee << std::endl;
-
-    QCOMMIT(builder);
-    auto result = builder->Call(name, 0);
-    QRELOAD_DROP(builder, nargs);
-    push(builder, result);
+  } else if (!cfg_.passParam) {
+    emitDirectCall(index, builder);
   }
 
   /////////// Emit direct call with passparam
@@ -548,6 +539,20 @@ void MethodBuilder::emitInterpreterCall(std::size_t index,
 }
 
 #if 0
+
+void MethodBuilder::emitDirectCall(std::size_t index,
+                                   TR::BytecodeBuilder *builder) {
+  auto callee = virtualMachine_->getFunction(index);
+  auto nargs = callee->nargs;
+
+  if (cfg_.debug) std::cout << "EMIT: DirectCall: " << *callee << std::endl;
+
+  QCOMMIT(builder);
+  auto result = builder->Call(callee->name.c_str(), 0);
+  QRELOAD_DROP(builder, nargs);
+  push(builder, result);
+}
+
     
 void MethodBuilder::handle_bc_function_call_directcall(
     TR::BytecodeBuilder *builder,
