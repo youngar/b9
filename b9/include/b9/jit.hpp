@@ -81,10 +81,13 @@ class MethodBuilder : public TR::MethodBuilder {
                               TR::BytecodeBuilder *nextBuilder);
   void handle_bc_sub(TR::BytecodeBuilder *builder,
                      TR::BytecodeBuilder *nextBuilder);
+
   void handle_bc_add(TR::BytecodeBuilder *builder,
                      TR::BytecodeBuilder *nextBuilder);
-  void handle_bc_call(TR::BytecodeBuilder *builder,
-                      TR::BytecodeBuilder *nextBuilder);
+
+  void handle_bc_function_call(std::size_t index, TR::BytecodeBuilder *builder,
+                               TR::BytecodeBuilder *nextBuilder);
+
   void handle_bc_jmp(TR::BytecodeBuilder *builder,
                      std::vector<TR::BytecodeBuilder *> bytecodeBuilderTable,
                      const Instruction *program, long bytecodeIndex);

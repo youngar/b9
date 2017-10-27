@@ -468,62 +468,8 @@ bool MethodBuilder::generateILForBytecode(
         builder->AddFallThroughBuilder(nextBytecodeBuilder);
     } break;
     case ByteCode::FUNCTION_CALL: {
-      auto index = std::size_t(instruction.parameter());
-      auto callee = virtualMachine_->getFunction(index);
-      auto nargs = callee->nargs;
-      auto name = callee->name.c_str();
-
-      auto jitFunction = virtualMachine_->getJitAddress(index);
-
-      ////////////// TODO: Try to inline the function first
-
-      ////////////// Emit interpreter callout
-
-      if (!cfg_.directCall || jitFunction == nullptr) {
-        if (cfg_.debug)
-          std::cerr << "EMIT: InterpCall: " << *callee << std::endl;
-
-        QCOMMIT(builder);
-        TR::IlValue *result = builder->Call(
-            "jitToInterpreterCall", 2,
-            builder->ConstAddress(virtualMachine_->executionContext()),
-            builder->ConstInt32(index));
-        QRELOAD_DROP(builder, nargs);
-        push(builder, result);
-      }
-
-      /////////// Emit direct call without passparam
-
-      else if (!cfg_.passParam) {
-        if (cfg_.debug)
-          std::cout << "EMIT: DirectCall: " << *callee << std::endl;
-
-        QCOMMIT(builder);
-        auto result = builder->Call(name, 0);
-        QRELOAD_DROP(builder, nargs);
-        push(builder, result);
-      }
-
-      /////////// Emit direct call with passparam
-
-      else {
-        if (cfg_.debug)
-          std::cerr << "EMIT: PassParam: " << *callee << std::endl;
-
-        //////// TODO: Inline HERE!!!
-
-        std::vector<TR::IlValue *> parameters(nargs);
-        for (std::size_t i = nargs; i > 0; i--) {
-          parameters[i - 1] = pop(builder);
-        }
-        auto result =
-            builder->Call(callee->name.c_str(), nargs, parameters.data());
-        push(builder, result);
-      }
-
-      if (nextBytecodeBuilder)
-        builder->AddFallThroughBuilder(nextBytecodeBuilder);
-
+      handle_bc_function_call(instruction.parameter(), builder,
+                              nextBytecodeBuilder);
     } break;
     default:
       if (cfg_.debug) {
@@ -540,26 +486,63 @@ bool MethodBuilder::generateILForBytecode(
  * GENERATE CODE FOR BYTECODES
  *************************************************/
 
-#if 0
-void MethodBuilder::handle_bc_function_call(
-    TR::BytecodeBuilder *builder,
-    std::vector<TR::BytecodeBuilder *> bytecodeBuilderTable,
-    const Instruction *program, long bytecodeIndex) {
+void MethodBuilder::handle_bc_function_call(std::size_t index,
+                                            TR::BytecodeBuilder *builder,
+                                            TR::BytecodeBuilder *nextBuilder) {
+  auto callee = virtualMachine_->getFunction(index);
+  auto nargs = callee->nargs;
+  auto name = callee->name.c_str();
 
-      if (cfg_.directCall && cfg_.passParam) {
+  auto jitFunction = virtualMachine_->getJitAddress(index);
 
-      }
-      if (cfg_.directCall) {
-        if (cfg_.passParam) {
-          handle_bc_function_call_passparam
-        } else {
-          handle_bc_function_call_directcall
-        }
-      } else {
-        handle_bc_function_call_interpreter
-      }
+  ////////////// TODO: Try to inline the function first
 
+  ////////////// Emit interpreter callout
+
+  if (!cfg_.directCall || jitFunction == nullptr) {
+    if (cfg_.debug) std::cerr << "EMIT: InterpCall: " << *callee << std::endl;
+
+    QCOMMIT(builder);
+    TR::IlValue *result = builder->Call(
+        "jitToInterpreterCall", 2,
+        builder->ConstAddress(virtualMachine_->executionContext()),
+        builder->ConstInt32(index));
+    QRELOAD_DROP(builder, nargs);
+    push(builder, result);
+  }
+
+  /////////// Emit direct call without passparam
+
+  else if (!cfg_.passParam) {
+    if (cfg_.debug) std::cout << "EMIT: DirectCall: " << *callee << std::endl;
+
+    QCOMMIT(builder);
+    auto result = builder->Call(name, 0);
+    QRELOAD_DROP(builder, nargs);
+    push(builder, result);
+  }
+
+  /////////// Emit direct call with passparam
+
+  else {
+    if (cfg_.debug) std::cerr << "EMIT: PassParam: " << *callee << std::endl;
+
+    //////// TODO: Inline HERE!!!
+
+    std::vector<TR::IlValue *> parameters(nargs);
+    for (std::size_t i = nargs; i > 0; i--) {
+      parameters[i - 1] = pop(builder);
     }
+    auto result = builder->Call(callee->name.c_str(), nargs, parameters.data());
+    push(builder, result);
+  }
+
+  if (nextBuilder) {
+    builder->AddFallThroughBuilder(nextBuilder);
+  }
+}
+
+#if 0
 
 void MethodBuilder::handle_bc_function_call_interpreter(
     TR::BytecodeBuilder *builder,
@@ -576,7 +559,7 @@ void MethodBuilder::handle_bc_function_call_passparam(
     std::vector<TR::BytecodeBuilder *> bytecodeBuilderTable,
     const Instruction *program, long bytecodeIndex) {}
 
-#endif // 0
+#endif  // 0
 
 void MethodBuilder::handle_bc_jmp(
     TR::BytecodeBuilder *builder,
