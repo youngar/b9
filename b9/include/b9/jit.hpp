@@ -92,6 +92,8 @@ class MethodBuilder : public TR::MethodBuilder {
 
   void emitDirectCall(std::size_t index, TR::BytecodeBuilder *builder);
 
+  void emitPassParamCall(std::size_t index, TR::BytecodeBuilder *builder);
+
   void handle_bc_jmp(TR::BytecodeBuilder *builder,
                      std::vector<TR::BytecodeBuilder *> bytecodeBuilderTable,
                      const Instruction *program, long bytecodeIndex);

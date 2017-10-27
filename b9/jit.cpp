@@ -500,21 +500,8 @@ void MethodBuilder::handle_bc_function_call(std::size_t index,
     emitInterpreterCall(index, builder);
   } else if (!cfg_.passParam) {
     emitDirectCall(index, builder);
-  }
-
-  /////////// Emit direct call with passparam
-
-  else {
-    if (cfg_.debug) std::cerr << "EMIT: PassParam: " << *callee << std::endl;
-
-    //////// TODO: Inline HERE!!!
-
-    std::vector<TR::IlValue *> parameters(nargs);
-    for (std::size_t i = nargs; i > 0; i--) {
-      parameters[i - 1] = pop(builder);
-    }
-    auto result = builder->Call(callee->name.c_str(), nargs, parameters.data());
-    push(builder, result);
+  } else {
+    emitPassParamCall(index, builder);
   }
 
   if (nextBuilder) {
@@ -538,8 +525,6 @@ void MethodBuilder::emitInterpreterCall(std::size_t index,
   push(builder, result);
 }
 
-#if 0
-
 void MethodBuilder::emitDirectCall(std::size_t index,
                                    TR::BytecodeBuilder *builder) {
   auto callee = virtualMachine_->getFunction(index);
@@ -553,18 +538,21 @@ void MethodBuilder::emitDirectCall(std::size_t index,
   push(builder, result);
 }
 
-    
-void MethodBuilder::handle_bc_function_call_directcall(
-    TR::BytecodeBuilder *builder,
-    std::vector<TR::BytecodeBuilder *> bytecodeBuilderTable,
-    const Instruction *program, long bytecodeIndex) {}
+void MethodBuilder::emitPassParamCall(std::size_t index,
+                                      TR::BytecodeBuilder *builder) {
+  //////// TODO: Inline HERE!!!
+  auto callee = virtualMachine_->getFunction(index);
+  auto nargs = callee->nargs;
 
-void MethodBuilder::handle_bc_function_call_passparam(
-    TR::BytecodeBuilder *builder,
-    std::vector<TR::BytecodeBuilder *> bytecodeBuilderTable,
-    const Instruction *program, long bytecodeIndex) {}
+  if (cfg_.debug) std::cerr << "EMIT: PassParam: " << *callee << std::endl;
 
-#endif  // 0
+  std::vector<TR::IlValue *> parameters(nargs);
+  for (std::size_t i = nargs; i > 0; i--) {
+    parameters[i - 1] = pop(builder);
+  }
+  auto result = builder->Call(callee->name.c_str(), nargs, parameters.data());
+  push(builder, result);
+}
 
 void MethodBuilder::handle_bc_jmp(
     TR::BytecodeBuilder *builder,
