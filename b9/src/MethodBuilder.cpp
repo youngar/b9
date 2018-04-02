@@ -374,27 +374,27 @@ bool MethodBuilder::generateILForBytecode(
       handle_bc_jmp(builder, bytecodeBuilderTable, program, instructionIndex,
                     nextBytecodeBuilder);
       break;
-    case ByteCode::INT_JMP_EQ:
+    case ByteCode::JMP_EQ_EQ:
       handle_bc_jmp_eq(builder, bytecodeBuilderTable, program, instructionIndex,
                        nextBytecodeBuilder);
       break;
-    case ByteCode::INT_JMP_NEQ:
+    case ByteCode::JMP_EQ_NEQ:
       handle_bc_jmp_neq(builder, bytecodeBuilderTable, program,
                         instructionIndex, nextBytecodeBuilder);
       break;
-    case ByteCode::INT_JMP_LT:
+    case ByteCode::JMP_EQ_LT:
       handle_bc_jmp_lt(builder, bytecodeBuilderTable, program, instructionIndex,
                        nextBytecodeBuilder);
       break;
-    case ByteCode::INT_JMP_LE:
+    case ByteCode::JMP_EQ_LE:
       handle_bc_jmp_le(builder, bytecodeBuilderTable, program, instructionIndex,
                        nextBytecodeBuilder);
       break;
-    case ByteCode::INT_JMP_GT:
+    case ByteCode::JMP_EQ_GT:
       handle_bc_jmp_gt(builder, bytecodeBuilderTable, program, instructionIndex,
                        nextBytecodeBuilder);
       break;
-    case ByteCode::INT_JMP_GE:
+    case ByteCode::JMP_EQ_GE:
       handle_bc_jmp_ge(builder, bytecodeBuilderTable, program, instructionIndex,
                        nextBytecodeBuilder);
       break;
@@ -410,7 +410,7 @@ bool MethodBuilder::generateILForBytecode(
     case ByteCode::DIV:
       handle_bc_div(builder, nextBytecodeBuilder);
       break;
-    case ByteCode::INT_NOT:
+    case ByteCode::NOT:
       handle_bc_not(builder, nextBytecodeBuilder);
       break;
     case ByteCode::INT_PUSH_CONSTANT: {

@@ -29,47 +29,46 @@ var OperatorCode = Object.freeze({
 	"FUNCTION_CALL": 1,
 	"FUNCTION_RETURN": 2,
 	"PRIMITIVE_CALL": 3,
-	"JMP": 4,
-	"DUPLICATE": 5,
-	"DROP": 6,
-	"PUSH_FROM_VAR": 7,
-	"POP_INTO_VAR": 8,
-	"ADD": 9,
-	"SUB": 10,
-  	"MUL": 11,
-  	"DIV": 12,
-  	"INT_PUSH_CONSTANT": 13,
-	"INT_NOT": 14,
-	"INT_JMP_EQ": 15,
-	"INT_JMP_NEQ": 16,
-	"INT_JMP_GT": 17,
-	"INT_JMP_GE": 18,
-	"INT_JMP_LT": 19,
-	"INT_JMP_LE": 20,
+	"DUPLICATE": 4,
+	"DROP": 5,
+	"PUSH_FROM_VAR": 6,
+	"POP_INTO_VAR": 7,
+	"ADD": 8,
+	"SUB": 9,
+  	"MUL": 10,
+  	"DIV": 11,
+  	"INT_PUSH_CONSTANT": 12,
+	"NOT": 13,
+	"JMP": 14,
+	"JMP_EQ_EQ": 15,
+	"JMP_EQ_NEQ": 16,
+	"JMP_EQ_GT": 17,
+	"JMP_EQ_GE": 18,
+	"JMP_EQ_LT": 19,
+	"JMP_EQ_LE": 20,
 	"STR_PUSH_CONSTANT": 21,
-	"STR_JMP_EQ": 22,
 	"STR_JMP_NEQ": 23
 });
 
 /// Binary comparison operators converted to jump instructions
 JumpOperator = Object.freeze({
-	"==": "INT_JMP_EQ",
-	"!=": "INT_JMP_NEQ",
-	"<=": "INT_JMP_LE",
-	">=": "INT_JMP_GE",
-	"<": "INT_JMP_LT",
-	">": "INT_JMP_GT"
+	"==": "JMP_EQ_EQ",
+	"!=": "JMP_EQ_NEQ",
+	"<=": "JMP_EQ_LE",
+	">=": "JMP_EQ_GE",
+	"<": "JMP_EQ_LT",
+	">": "JMP_EQ_GT"
 });
 
 /// Map binary comparison operators to jump instructions that invert the condition.
 /// as an example, the if statement handler will use this table to invert a comparison, and jump over the if-true block.
 var NegJumpOperator = Object.freeze({
-	"==": "INT_JMP_NEQ",
-	"!=": "INT_JMP_EQ",
-	"<=": "INT_JMP_GT",
-	">=": "INT_JMP_LT",
-	"<": "INT_JMP_GE",
-	">": "INT_JMP_LE"
+	"==": "JMP_EQ_NEQ",
+	"!=": "JMP_EQ_EQ",
+	"<=": "JMP_EQ_GT",
+	">=": "JMP_EQ_LT",
+	"<": "JMP_EQ_GE",
+	">": "JMP_EQ_LE"
 });
 
 /// Map a++ style operators to b9 operator codes.
@@ -177,12 +176,12 @@ function FunctionDefinition(outer) {
 			var instruction = this.instructions[index];
 			switch (instruction.operator) {
 				case "JMP":
-				case "INT_JMP_EQ":
-				case "INT_JMP_NEQ":
-				case "INT_JMP_GT":
-				case "INT_JMP_GE":
-				case "INT_JMP_LT":
-				case "INT_JMP_LE":
+				case "JMP_EQ_EQ":
+				case "JMP_EQ_NEQ":
+				case "JMP_EQ_GT":
+				case "JMP_EQ_GE":
+				case "JMP_EQ_LT":
+				case "JMP_EQ_LE":
 					// the label id is stuffed in the operand.
 					// translate the label to a relative offset.
 					instruction.operand = this.resolveLabel(instruction.operand, index);
@@ -490,7 +489,7 @@ function FirstPassCodeGen() {
 		}
 		if (decl.operator == "!") {
 			this.handle(func, decl.argument);
-			func.instructions.push(new Instruction("INT_NOT"));
+			func.instructions.push(new Instruction("NOT"));
 			return;
 		}
 		throw Error("No Handler for Type: " + decl);

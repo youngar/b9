@@ -137,35 +137,29 @@ StackElement ExecutionContext::interpret(const std::size_t functionIndex) {
       case ByteCode::INT_PUSH_CONSTANT:
         doIntPushConstant(instructionPointer->parameter());
         break;
-      case ByteCode::INT_NOT:
+      case ByteCode::NOT:
         doIntNot();
         break;
-      case ByteCode::INT_JMP_EQ:
+      case ByteCode::JMP_EQ_EQ:
         instructionPointer += doIntJmpEq(instructionPointer->parameter());
         break;
-      case ByteCode::INT_JMP_NEQ:
+      case ByteCode::JMP_EQ_NEQ:
         instructionPointer += doIntJmpNeq(instructionPointer->parameter());
         break;
-      case ByteCode::INT_JMP_GT:
+      case ByteCode::JMP_EQ_GT:
         instructionPointer += doIntJmpGt(instructionPointer->parameter());
         break;
-      case ByteCode::INT_JMP_GE:
+      case ByteCode::JMP_EQ_GE:
         instructionPointer += doIntJmpGe(instructionPointer->parameter());
         break;
-      case ByteCode::INT_JMP_LT:
+      case ByteCode::JMP_EQ_LT:
         instructionPointer += doIntJmpLt(instructionPointer->parameter());
         break;
-      case ByteCode::INT_JMP_LE:
+      case ByteCode::JMP_EQ_LE:
         instructionPointer += doIntJmpLe(instructionPointer->parameter());
         break;
       case ByteCode::STR_PUSH_CONSTANT:
         doStrPushConstant(instructionPointer->parameter());
-        break;
-      case ByteCode::STR_JMP_EQ:
-        // TODO
-        break;
-      case ByteCode::STR_JMP_NEQ:
-        // TODO
         break;
       case ByteCode::NEW_OBJECT:
         doNewObject();

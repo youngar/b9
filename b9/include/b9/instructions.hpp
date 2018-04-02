@@ -22,54 +22,51 @@ enum class ByteCode : RawByteCode {
   FUNCTION_RETURN = 0x2,
   // Call a native C function
   PRIMITIVE_CALL = 0x3,
-  // Jump unconditionally by the offset
-  JMP = 0x4,
   // Duplicate the top element on the stack
-  DUPLICATE = 0x5,
+  DUPLICATE = 0x4,
   // Drop the top element of the stack
-  DROP = 0x6,
+  DROP = 0x5,
   // Push from a local variable
-  PUSH_FROM_VAR = 0x7,
+  PUSH_FROM_VAR = 0x6,
   // Push into a local variable
-  POP_INTO_VAR = 0x8,
-
+  POP_INTO_VAR = 0x7,
   // Pushes the result of `lval + rval`, not limited to numbers
-  ADD = 0x9,
+  ADD = 0x8,
 
   // Arithmetic bytecodes
 
   // Subtract two operands
-  SUB = 0xa,
+  SUB = 0x9,
   // Multiply two operands
-  MUL = 0xb,
+  MUL = 0xa,
   // Divide two operands
-  DIV = 0xc,
-
+  DIV = 0xb,
   // Push a constant
-  INT_PUSH_CONSTANT = 0xd,
+  INT_PUSH_CONSTANT = 0xc,
   // Invert a boolean value, all non-zero integers are true
-  INT_NOT = 0xe,
-  // Jump if two integers are equal
-  INT_JMP_EQ = 0xf,
-  // Jump if two integer are not equal
-  INT_JMP_NEQ = 0x10,
-  // Jump if the first integer is greater than the second
-  INT_JMP_GT = 0x11,
-  // Jump if the first integer is greater than or equal to the second
-  INT_JMP_GE = 0x12,
-  // Jump if the first integer is less than to the second
-  INT_JMP_LT = 0x13,
-  // Jump if the first integer is less than or equal to the second
-  INT_JMP_LE = 0x14,
+  NOT = 0xd,
+
+  // Control flow bytecodes
+
+  // Jump unconditionally by the offset
+  JMP = 0xe,
+  // Jump if two values are equal
+  JMP_EQ_EQ = 0xf,
+  // Jump if two values are not equal
+  JMP_EQ_NEQ = 0x10,
+  // Jump if the first value is greater than the second
+  JMP_EQ_GT = 0x11,
+  // Jump if the first value is greater than or equal to the second
+  JMP_EQ_GE = 0x12,
+  // Jump if the first value is less than to the second
+  JMP_EQ_LT = 0x13,
+  // Jump if the first value is less than or equal to the second
+  JMP_EQ_LE = 0x14,
 
   // String ByteCodes
 
   // Push a string from this module's constant pool
   STR_PUSH_CONSTANT = 0x15,
-  // Jump if two strings are equal
-  STR_JMP_EQ = 0x16,
-  // Jump if two strings are not equal
-  STR_JMP_NEQ = 0x17,
 
   // Object Bytecodes
 
@@ -94,8 +91,6 @@ inline const char *toString(ByteCode bc) {
       return "function_return";
     case ByteCode::PRIMITIVE_CALL:
       return "primitive_call";
-    case ByteCode::JMP:
-      return "jmp";
     case ByteCode::DUPLICATE:
       return "duplicate";
     case ByteCode::DROP:
@@ -105,35 +100,33 @@ inline const char *toString(ByteCode bc) {
     case ByteCode::POP_INTO_VAR:
       return "pop_into_var";
     case ByteCode::ADD:
-      return "int_add";
+      return "add";
     case ByteCode::SUB:
-      return "int_sub";
+      return "sub";
     case ByteCode::MUL:
-      return "int_mul";
+      return "mul";
     case ByteCode::DIV:
-      return "int_div";
+      return "div";
     case ByteCode::INT_PUSH_CONSTANT:
-      return "int_push_constant";
-    case ByteCode::INT_NOT:
-      return "int_not";
-    case ByteCode::INT_JMP_EQ:
-      return "int_jmp_eq";
-    case ByteCode::INT_JMP_NEQ:
-      return "int_jmp_neq";
-    case ByteCode::INT_JMP_GT:
-      return "int_jmp_gt";
-    case ByteCode::INT_JMP_GE:
-      return "int_jmp_ge";
-    case ByteCode::INT_JMP_LT:
-      return "int_jmp_lt";
-    case ByteCode::INT_JMP_LE:
-      return "int_jmp_le";
+      return "push_constant";
+    case ByteCode::NOT:
+      return "not";
+    case ByteCode::JMP:
+      return "jmp";
+    case ByteCode::JMP_EQ_EQ:
+      return "jmp_eq";
+    case ByteCode::JMP_EQ_NEQ:
+      return "jmp_neq";
+    case ByteCode::JMP_EQ_GT:
+      return "jmp_gt";
+    case ByteCode::JMP_EQ_GE:
+      return "jmp_ge";
+    case ByteCode::JMP_EQ_LT:
+      return "jmp_lt";
+    case ByteCode::JMP_EQ_LE:
+      return "jmp_le";
     case ByteCode::STR_PUSH_CONSTANT:
       return "str_push_constant";
-    case ByteCode::STR_JMP_EQ:
-      return "str_jmp_eq";
-    case ByteCode::STR_JMP_NEQ:
-      return "str_jmp_neq";
     case ByteCode::NEW_OBJECT:
       return "new_object";
     case ByteCode::PUSH_FROM_OBJECT:
@@ -247,7 +240,7 @@ inline std::ostream &operator<<(std::ostream &out, Instruction i) {
     case ByteCode::SUB:
     case ByteCode::MUL:
     case ByteCode::DIV:
-    case ByteCode::INT_NOT:
+    case ByteCode::NOT:
     case ByteCode::NEW_OBJECT:
     case ByteCode::CALL_INDIRECT:
     case ByteCode::SYSTEM_COLLECT:
@@ -259,15 +252,13 @@ inline std::ostream &operator<<(std::ostream &out, Instruction i) {
     case ByteCode::PUSH_FROM_VAR:
     case ByteCode::POP_INTO_VAR:
     case ByteCode::INT_PUSH_CONSTANT:
-    case ByteCode::INT_JMP_EQ:
-    case ByteCode::INT_JMP_NEQ:
-    case ByteCode::INT_JMP_GT:
-    case ByteCode::INT_JMP_GE:
-    case ByteCode::INT_JMP_LT:
-    case ByteCode::INT_JMP_LE:
+    case ByteCode::JMP_EQ_EQ:
+    case ByteCode::JMP_EQ_NEQ:
+    case ByteCode::JMP_EQ_GT:
+    case ByteCode::JMP_EQ_GE:
+    case ByteCode::JMP_EQ_LT:
+    case ByteCode::JMP_EQ_LE:
     case ByteCode::STR_PUSH_CONSTANT:
-    case ByteCode::STR_JMP_EQ:
-    case ByteCode::STR_JMP_NEQ:
     case ByteCode::PUSH_FROM_OBJECT:
     case ByteCode::POP_INTO_OBJECT:
     default:
