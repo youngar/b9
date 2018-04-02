@@ -122,16 +122,16 @@ StackElement ExecutionContext::interpret(const std::size_t functionIndex) {
         // TODO bad name, push or pop?
         doPushIntoVar(args, instructionPointer->parameter());
         break;
-      case ByteCode::INT_ADD:
+      case ByteCode::ADD:
         doIntAdd();
         break;
-      case ByteCode::INT_SUB:
+      case ByteCode::SUB:
         doIntSub();
         break;
-      case ByteCode::INT_MUL:
+      case ByteCode::MUL:
         doIntMul();
         break;
-      case ByteCode::INT_DIV:
+      case ByteCode::DIV:
         doIntDiv();
         break;
       case ByteCode::INT_PUSH_CONSTANT:

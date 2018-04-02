@@ -34,10 +34,10 @@ var OperatorCode = Object.freeze({
 	"DROP": 6,
 	"PUSH_FROM_VAR": 7,
 	"POP_INTO_VAR": 8,
-	"INT_ADD": 9,
-	"INT_SUB": 10,
-  	"INT_MUL": 11,
-  	"INT_DIV": 12,
+	"ADD": 9,
+	"SUB": 10,
+  	"MUL": 11,
+  	"DIV": 12,
   	"INT_PUSH_CONSTANT": 13,
 	"INT_NOT": 14,
 	"INT_JMP_EQ": 15,
@@ -74,8 +74,8 @@ var NegJumpOperator = Object.freeze({
 
 /// Map a++ style operators to b9 operator codes.
 var UpdateOperator = Object.freeze({
-	"++": "INT_ADD",
-	"--": "INT_SUB"
+	"++": "ADD",
+	"--": "SUB"
 });
 
 /// A B9 Instruction -- operator and operand pair.
@@ -408,10 +408,10 @@ function FirstPassCodeGen() {
 
 	this.handleAssignmentExpression = function (func, expression) {
 		var AssignmentOperatorCode = Object.freeze({
-			"+=": "INT_ADD",
-			"-=": "INT_SUB",
-			"/=": "INT_DIV",
-			"*=": "INT_MUL"
+			"+=": "ADD",
+			"-=": "SUB",
+			"/=": "DIV",
+			"*=": "MUL"
 		});
 
 		if (expression.left.type == "Identifier") {
@@ -485,7 +485,7 @@ function FirstPassCodeGen() {
 			this.pushconstant(0);
 			func.instructions.push(new Instruction("INT_PUSH_CONSTANT", 0));
 			this.handle(func, decl.argument);
-			func.instructions.push(new Instruction("INT_SUB"));
+			func.instructions.push(new Instruction("SUB"));
 			return;
 		}
 		if (decl.operator == "!") {
@@ -501,16 +501,16 @@ function FirstPassCodeGen() {
 		this.handle(func, decl.left);
 		this.handle(func, decl.right);
 		if (decl.operator == "-") {
-			func.instructions.push(new Instruction("INT_SUB"));
+			func.instructions.push(new Instruction("SUB"));
 		}
 		else if (decl.operator == "+") {
-			func.instructions.push(new Instruction("INT_ADD"));
+			func.instructions.push(new Instruction("ADD"));
 		}
 		else if (decl.operator == "*") {
-			func.instructions.push(new Instruction("INT_MUL"));
+			func.instructions.push(new Instruction("MUL"));
 		}
 		else if (decl.operator == "/") {
-			func.instructions.push(new Instruction("INT_DIV"));
+			func.instructions.push(new Instruction("DIV"));
 		}
 		else {
 			// TODO: Support comparison operators.

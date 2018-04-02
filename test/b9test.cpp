@@ -137,7 +137,7 @@ TEST(MyTest, arguments) {
   auto m = std::make_shared<Module>();
   std::vector<Instruction> i = {{ByteCode::PUSH_FROM_VAR, 0},
                                 {ByteCode::PUSH_FROM_VAR, 1},
-                                {ByteCode::INT_ADD},
+                                {ByteCode::ADD},
                                 {ByteCode::FUNCTION_RETURN},
                                 END_SECTION};
   uint32_t index = 0;

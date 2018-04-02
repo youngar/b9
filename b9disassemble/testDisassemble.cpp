@@ -23,7 +23,7 @@ std::shared_ptr<Module> makeSimpleModule() {
   auto m = std::make_shared<Module>();
   std::vector<Instruction> i = {{ByteCode::INT_PUSH_CONSTANT, 2},
                                 {ByteCode::INT_PUSH_CONSTANT, 2},
-                                {ByteCode::INT_ADD},
+                                {ByteCode::ADD},
                                 {ByteCode::FUNCTION_RETURN},
                                 END_SECTION};
 
@@ -37,7 +37,7 @@ std::shared_ptr<Module> makeComplexModule() {
   auto m = std::make_shared<Module>();
   std::vector<Instruction> f1 = {{ByteCode::INT_PUSH_CONSTANT, 2},
                                  {ByteCode::INT_PUSH_CONSTANT, 2},
-                                 {ByteCode::INT_ADD},
+                                 {ByteCode::ADD},
                                  {ByteCode::FUNCTION_RETURN},
                                  END_SECTION};
 
@@ -102,7 +102,7 @@ bool roundTripInstructions(std::vector<Instruction> instructions) {
 TEST(RoundTripSerializationTest, testInstructions) {
   std::vector<Instruction> instructions1 = {{ByteCode::INT_PUSH_CONSTANT, 2},
                                             {ByteCode::INT_PUSH_CONSTANT, 2},
-                                            {ByteCode::INT_ADD},
+                                            {ByteCode::ADD},
                                             {ByteCode::FUNCTION_RETURN},
                                             END_SECTION};
 
@@ -110,7 +110,7 @@ TEST(RoundTripSerializationTest, testInstructions) {
 
   std::vector<Instruction> instructions3 = {{ByteCode::INT_PUSH_CONSTANT, 2},
                                             {ByteCode::INT_PUSH_CONSTANT, 2},
-                                            {ByteCode::INT_ADD},
+                                            {ByteCode::ADD},
                                             {ByteCode::FUNCTION_RETURN}};
 
   std::vector<Instruction> instructions4 = {END_SECTION};
@@ -135,7 +135,7 @@ void roundTripFunctionData(FunctionDef& f) {
 TEST(RoundTripSerializationTest, testFunctionData) {
   std::vector<Instruction> i1 = {{ByteCode::INT_PUSH_CONSTANT, 2},
                                  {ByteCode::INT_PUSH_CONSTANT, 2},
-                                 {ByteCode::INT_ADD},
+                                 {ByteCode::ADD},
                                  {ByteCode::FUNCTION_RETURN},
                                  END_SECTION};
   auto f1 = FunctionDef("testName", 0, i1, 4, 5);
@@ -165,7 +165,7 @@ void roundTripFunctionSection(std::vector<FunctionDef> functions) {
 TEST(RoundTripSerializationTest, testFunctionSection) {
   std::vector<Instruction> i1 = {{ByteCode::INT_PUSH_CONSTANT, 2},
                                  {ByteCode::INT_PUSH_CONSTANT, 2},
-                                 {ByteCode::INT_ADD},
+                                 {ByteCode::ADD},
                                  {ByteCode::FUNCTION_RETURN},
                                  END_SECTION};
   auto f1 = FunctionDef("testName", 0, i1, 4, 5);
@@ -176,7 +176,7 @@ TEST(RoundTripSerializationTest, testFunctionSection) {
 
   std::vector<Instruction> i2 = {{ByteCode::INT_PUSH_CONSTANT, 2},
                                  {ByteCode::INT_PUSH_CONSTANT, 2},
-                                 {ByteCode::INT_ADD},
+                                 {ByteCode::ADD},
                                  {ByteCode::FUNCTION_RETURN},
                                  END_SECTION};
   auto f2 = FunctionDef("testName", 5, i2, 1, 2);
@@ -207,7 +207,7 @@ TEST(RoundTripSerializationTest, testSerializeDeserialize) {
   auto m3 = std::make_shared<Module>();
   std::vector<Instruction> i = {{ByteCode::INT_PUSH_CONSTANT, 2},
                                 {ByteCode::INT_PUSH_CONSTANT, 2},
-                                {ByteCode::INT_ADD},
+                                {ByteCode::ADD},
                                 {ByteCode::FUNCTION_RETURN},
                                 END_SECTION};
   auto f = FunctionDef("testName", 0, i, 4, 5);

@@ -33,16 +33,17 @@ enum class ByteCode : RawByteCode {
   // Push into a local variable
   POP_INTO_VAR = 0x8,
 
-  // Integer bytecodes
+  // Pushes the result of `lval + rval`, not limited to numbers
+  ADD = 0x9,
 
-  // Add two integers
-  INT_ADD = 0x9,
-  // Subtract two integers
-  INT_SUB = 0xa,
-  // Multiply two integers
-  INT_MUL = 0xb,
-  // Divide two integers
-  INT_DIV = 0xc,
+  // Arithmetic bytecodes
+
+  // Subtract two operands
+  SUB = 0xa,
+  // Multiply two operands
+  MUL = 0xb,
+  // Divide two operands
+  DIV = 0xc,
 
   // Push a constant
   INT_PUSH_CONSTANT = 0xd,
@@ -103,13 +104,13 @@ inline const char *toString(ByteCode bc) {
       return "push_from_var";
     case ByteCode::POP_INTO_VAR:
       return "pop_into_var";
-    case ByteCode::INT_ADD:
+    case ByteCode::ADD:
       return "int_add";
-    case ByteCode::INT_SUB:
+    case ByteCode::SUB:
       return "int_sub";
-    case ByteCode::INT_MUL:
+    case ByteCode::MUL:
       return "int_mul";
-    case ByteCode::INT_DIV:
+    case ByteCode::DIV:
       return "int_div";
     case ByteCode::INT_PUSH_CONSTANT:
       return "int_push_constant";
@@ -242,10 +243,10 @@ inline std::ostream &operator<<(std::ostream &out, Instruction i) {
     case ByteCode::DUPLICATE:
     case ByteCode::FUNCTION_RETURN:
     case ByteCode::DROP:
-    case ByteCode::INT_ADD:
-    case ByteCode::INT_SUB:
-    case ByteCode::INT_MUL:
-    case ByteCode::INT_DIV:
+    case ByteCode::ADD:
+    case ByteCode::SUB:
+    case ByteCode::MUL:
+    case ByteCode::DIV:
     case ByteCode::INT_NOT:
     case ByteCode::NEW_OBJECT:
     case ByteCode::CALL_INDIRECT:

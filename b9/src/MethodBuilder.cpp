@@ -398,16 +398,16 @@ bool MethodBuilder::generateILForBytecode(
       handle_bc_jmp_ge(builder, bytecodeBuilderTable, program, instructionIndex,
                        nextBytecodeBuilder);
       break;
-    case ByteCode::INT_SUB:
+    case ByteCode::SUB:
       handle_bc_sub(builder, nextBytecodeBuilder);
       break;
-    case ByteCode::INT_ADD:
+    case ByteCode::ADD:
       handle_bc_add(builder, nextBytecodeBuilder);
       break;
-    case ByteCode::INT_MUL:
+    case ByteCode::MUL:
       handle_bc_mul(builder, nextBytecodeBuilder);
       break;
-    case ByteCode::INT_DIV:
+    case ByteCode::DIV:
       handle_bc_div(builder, nextBytecodeBuilder);
       break;
     case ByteCode::INT_NOT:
