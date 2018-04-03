@@ -60,29 +60,29 @@ class ExecutionContext {
 
   void doPushIntoVar(StackElement *args, Parameter offset);
 
-  void doIntAdd();
+  void doAdd();
 
-  void doIntSub();
+  void doSub();
 
-  void doIntMul();
+  void doMul();
 
-  void doIntDiv();
+  void doDiv();
 
   void doIntPushConstant(Parameter value);
 
-  void doIntNot();
+  void doNot();
 
-  Parameter doIntJmpEq(Parameter delta);
+  Parameter doJmpEq(Parameter delta);
 
-  Parameter doIntJmpNeq(Parameter delta);
+  Parameter doJmpNeq(Parameter delta);
 
-  Parameter doIntJmpGt(Parameter delta);
+  Parameter doJmpGt(Parameter delta);
 
-  Parameter doIntJmpGe(Parameter delta);
+  Parameter doJmpGe(Parameter delta);
 
-  Parameter doIntJmpLt(Parameter delta);
+  Parameter doJmpLt(Parameter delta);
 
-  Parameter doIntJmpLe(Parameter delta);
+  Parameter doJmpLe(Parameter delta);
 
   void doStrPushConstant(Parameter value);
 

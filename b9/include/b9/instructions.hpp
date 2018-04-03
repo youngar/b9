@@ -108,7 +108,7 @@ inline const char *toString(ByteCode bc) {
     case ByteCode::DIV:
       return "div";
     case ByteCode::INT_PUSH_CONSTANT:
-      return "push_constant";
+      return "int_push_constant";
     case ByteCode::NOT:
       return "not";
     case ByteCode::JMP:

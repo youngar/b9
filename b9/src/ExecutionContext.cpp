@@ -123,40 +123,40 @@ StackElement ExecutionContext::interpret(const std::size_t functionIndex) {
         doPushIntoVar(args, instructionPointer->parameter());
         break;
       case ByteCode::ADD:
-        doIntAdd();
+        doAdd();
         break;
       case ByteCode::SUB:
-        doIntSub();
+        doSub();
         break;
       case ByteCode::MUL:
-        doIntMul();
+        doMul();
         break;
       case ByteCode::DIV:
-        doIntDiv();
+        doDiv();
         break;
       case ByteCode::INT_PUSH_CONSTANT:
         doIntPushConstant(instructionPointer->parameter());
         break;
       case ByteCode::NOT:
-        doIntNot();
+        doNot();
         break;
       case ByteCode::JMP_EQ_EQ:
-        instructionPointer += doIntJmpEq(instructionPointer->parameter());
+        instructionPointer += doJmpEq(instructionPointer->parameter());
         break;
       case ByteCode::JMP_EQ_NEQ:
-        instructionPointer += doIntJmpNeq(instructionPointer->parameter());
+        instructionPointer += doJmpNeq(instructionPointer->parameter());
         break;
       case ByteCode::JMP_EQ_GT:
-        instructionPointer += doIntJmpGt(instructionPointer->parameter());
+        instructionPointer += doJmpGt(instructionPointer->parameter());
         break;
       case ByteCode::JMP_EQ_GE:
-        instructionPointer += doIntJmpGe(instructionPointer->parameter());
+        instructionPointer += doJmpGe(instructionPointer->parameter());
         break;
       case ByteCode::JMP_EQ_LT:
-        instructionPointer += doIntJmpLt(instructionPointer->parameter());
+        instructionPointer += doJmpLt(instructionPointer->parameter());
         break;
       case ByteCode::JMP_EQ_LE:
-        instructionPointer += doIntJmpLe(instructionPointer->parameter());
+        instructionPointer += doJmpLe(instructionPointer->parameter());
         break;
       case ByteCode::STR_PUSH_CONSTANT:
         doStrPushConstant(instructionPointer->parameter());
@@ -221,7 +221,7 @@ void ExecutionContext::doPushIntoVar(StackElement *args, Parameter offset) {
   args[offset] = stack_.pop();
 }
 
-void ExecutionContext::doIntAdd() {
+void ExecutionContext::doAdd() {
   std::int32_t right = stack_.pop().getInteger();
   std::int32_t left = stack_.pop().getInteger();
   StackElement result;
@@ -229,7 +229,7 @@ void ExecutionContext::doIntAdd() {
   push(result);
 }
 
-void ExecutionContext::doIntSub() {
+void ExecutionContext::doSub() {
   std::int32_t right = stack_.pop().getInteger();
   std::int32_t left = stack_.pop().getInteger();
   StackElement result;
@@ -237,7 +237,7 @@ void ExecutionContext::doIntSub() {
   push(result);
 }
 
-void ExecutionContext::doIntMul() {
+void ExecutionContext::doMul() {
   std::int32_t right = stack_.pop().getInteger();
   std::int32_t left = stack_.pop().getInteger();
   StackElement result;
@@ -245,7 +245,7 @@ void ExecutionContext::doIntMul() {
   push(result);
 }
 
-void ExecutionContext::doIntDiv() {
+void ExecutionContext::doDiv() {
   std::int32_t right = stack_.pop().getInteger();
   std::int32_t left = stack_.pop().getInteger();
   StackElement result;
@@ -257,14 +257,14 @@ void ExecutionContext::doIntPushConstant(Parameter value) {
   stack_.push(StackElement().setInteger(value));
 }
 
-void ExecutionContext::doIntNot() {
+void ExecutionContext::doNot() {
   std::int32_t i = stack_.pop().getInteger();
   StackElement v;
   v.setInteger(!i);
   push(v);
 }
 
-Parameter ExecutionContext::doIntJmpEq(Parameter delta) {
+Parameter ExecutionContext::doJmpEq(Parameter delta) {
   std::int32_t right = stack_.pop().getInteger();
   std::int32_t left = stack_.pop().getInteger();
   if (left == right) {
@@ -273,7 +273,7 @@ Parameter ExecutionContext::doIntJmpEq(Parameter delta) {
   return 0;
 }
 
-Parameter ExecutionContext::doIntJmpNeq(Parameter delta) {
+Parameter ExecutionContext::doJmpNeq(Parameter delta) {
   std::int32_t right = stack_.pop().getInteger();
   std::int32_t left = stack_.pop().getInteger();
   if (left != right) {
@@ -282,7 +282,7 @@ Parameter ExecutionContext::doIntJmpNeq(Parameter delta) {
   return 0;
 }
 
-Parameter ExecutionContext::doIntJmpGt(Parameter delta) {
+Parameter ExecutionContext::doJmpGt(Parameter delta) {
   std::int32_t right = stack_.pop().getInteger();
   std::int32_t left = stack_.pop().getInteger();
   if (left > right) {
@@ -292,7 +292,7 @@ Parameter ExecutionContext::doIntJmpGt(Parameter delta) {
 }
 
 // ( left right -- )
-Parameter ExecutionContext::doIntJmpGe(Parameter delta) {
+Parameter ExecutionContext::doJmpGe(Parameter delta) {
   std::int32_t right = stack_.pop().getInteger();
   std::int32_t left = stack_.pop().getInteger();
   if (left >= right) {
@@ -302,7 +302,7 @@ Parameter ExecutionContext::doIntJmpGe(Parameter delta) {
 }
 
 // ( left right -- )
-Parameter ExecutionContext::doIntJmpLt(Parameter delta) {
+Parameter ExecutionContext::doJmpLt(Parameter delta) {
   std::int32_t right = stack_.pop().getInteger();
   std::int32_t left = stack_.pop().getInteger();
   if (left < right) {
@@ -312,7 +312,7 @@ Parameter ExecutionContext::doIntJmpLt(Parameter delta) {
 }
 
 // ( left right -- )
-Parameter ExecutionContext::doIntJmpLe(Parameter delta) {
+Parameter ExecutionContext::doJmpLe(Parameter delta) {
   std::int32_t right = stack_.pop().getInteger();
   std::int32_t left = stack_.pop().getInteger();
   if (left <= right) {
